@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>校园签到台 · 人脸签到系统</title>
+<style>
+:root { --paper:#faf8f0; --ink:#17263c; --blue:#233f9e; --muted:#536071; --rule:#c9cdd1; --orange:#e87938; }
+* {box-sizing:border-box}
+[hidden] {display:none !important}
+body {margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+button,input {font:inherit}
+button,a {touch-action:manipulation}
+button {cursor:pointer}
+a {color:inherit;text-decoration:none}
+button:focus-visible,a:focus-visible,input:focus-visible {outline:3px solid #af431f;outline-offset:4px}
+.wrap {width:min(1120px,calc(100% - 96px));margin:auto}
+header {border-bottom:1px solid var(--rule)}
+.top {min-height:76px;display:flex;align-items:center;justify-content:space-between}
+.brand,.account {display:inline-flex;align-items:center;gap:10px;min-height:44px}
+.brand {font-weight:720;letter-spacing:.02em}
+.brand-mark {width:28px;height:28px;color:var(--blue)}
+.account {font-size:15px;color:var(--blue);font-weight:600}
+.account svg {width:19px;height:19px}
+main {padding:42px 0 56px}
+.hero {display:grid;grid-template-columns:minmax(0,1.03fr) minmax(0,1fr);align-items:center;gap:6%; padding:25px 0 42px}
+h1,h2,p {margin:0}
+h1 {font-size:clamp(48px,6vw,82px);letter-spacing:-.065em;color:var(--blue);line-height:1.12;font-weight:800}
+.intro p {margin:22px 0 28px;font-size:18px;color:var(--muted)}
+.art {display:block;width:100%;height:auto}
+.capture,.submit,.upload-choice {border:0;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 24px;font-weight:650;background:var(--blue);color:white}
+.capture {min-height:54px;font-size:18px;min-width:190px}
+.capture:hover,.submit:hover {background:#172f82}
+svg.glyph {width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.links {border-top:2px solid var(--blue);display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule)}
+.route {display:flex;gap:18px;align-items:center;padding:26px 20px 26px 0;min-height:105px}
+.route+.route {border-left:1px solid var(--rule);padding-left:32px}
+.route:hover,.route:focus-visible {background:#eeeede}
+.route .tile {background:#e5eafb;color:var(--blue);border-radius:2px;padding:10px;display:grid;place-items:center}
+.route strong,.route small {display:block}
+.route strong {font-size:20px}
+.route small {color:var(--muted);font-size:15px;margin-top:1px}
+.chev {font-size:25px;color:var(--blue);margin-left:auto;line-height:1}
+.panel {max-width:560px;margin:0 auto}
+.back {min-height:44px;display:inline-flex;align-items:center;gap:7px;color:var(--blue);font-weight:650}
+.panel h1 {margin:18px 0 13px;font-size:clamp(34px,5vw,51px);letter-spacing:-.04em}
+.panel .hint {margin-bottom:25px;color:var(--muted)}
+form {display:grid;gap:18px}
+label,fieldset legend {font-weight:650}
+label input {display:block;margin-top:6px;width:100%;min-height:46px;background:#fffefa;border:1px solid #8992a0;border-radius:3px;padding:8px 12px;color:var(--ink)}
+fieldset {border:0;padding:0;margin:0;min-width:0}
+fieldset p,.file-note {color:var(--muted);font-size:15px;margin:3px 0 10px}
+.choices {display:flex;gap:10px;flex-wrap:wrap}
+.upload-choice {background:transparent;border:1px solid var(--blue);color:var(--blue);min-height:46px;padding:9px 15px}
+.preview {display:block;max-height:220px;max-width:100%;margin:12px 0;object-fit:contain}
+.status {color:var(--blue);font-weight:600}
+.footlink {display:inline-flex;align-items:center;min-height:44px;color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+@media(max-width:760px){
+.wrap {width:calc(100% - 40px)}
+.top {min-height:60px}
+main {padding:22px 0 34px}
+.hero {grid-template-columns:1fr;gap:0;padding:0}
+.art {grid-row:1;max-height:210px;margin-bottom:22px}
+h1 {font-size:46px;line-height:1.2}
+.intro p {margin:10px 0 20px;font-size:16px}
+.capture {width:100%;min-height:50px}
+.links {margin-top:28px;grid-template-columns:1fr}
+.route,.route+.route {padding:14px 3px;min-height:78px;border-left:0}
+.route+.route {border-top:1px solid var(--rule)}
+.route strong {font-size:18px}
+.route small {font-size:15px}
+.route .tile {padding:8px}
+}
+@media(prefers-reduced-motion:no-preference){a,button {transition:background-color .15s}}
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+<symbol id="camera" viewBox="0 0 24 24"><path d="M3 7.5h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+<symbol id="account" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c.8-4 3.2-6 7.5-6s6.7 2 7.5 6"/></symbol>
+<symbol id="icon-register" viewBox="0 0 24 24"><path d="M2.5 5.5h19v13h-19z"/><circle cx="8.5" cy="10.5" r="1.8"/><path d="M5.5 15.5c.8-2.3 5.2-2.3 6 0m3-5h4m-4 4h3"/></symbol>
+<symbol id="journal" viewBox="0 0 24 24"><path d="M5 3.5h13a1.5 1.5 0 0 1 1.5 1.5v15H6.5A2.5 2.5 0 0 1 4 17.5v-13A1 1 0 0 1 5 3.5zm-.6 13H19M8.5 8h7M8.5 11h5"/></symbol>
+</defs></svg>
+<header><div class="wrap top">
+<a class="brand" href="#home"><svg aria-hidden="true" class="brand-mark" viewBox="0 0 28 28" fill="currentColor"><path d="M1 26V3h5v23zm8 0V3h5v23zm8 0V3h10v5h-5v18z"/></svg>人脸签到系统</a>
+<a class="account" href="#login"><svg aria-hidden="true" class="glyph"><use href="#account"/></svg>登录</a>
+</div></header>
+<main class="wrap">
+<section id="home">
+<div class="hero">
+<div class="intro"><h1 tabindex="-1">校园签到台</h1><p>已录入标准照的同学，无需登录即可打卡。</p>
+<button class="capture" type="button" data-pick="check-photo"><svg class="glyph" aria-hidden="true"><use href="#camera"/></svg>拍照打卡</button></div>
+<svg class="art" viewBox="0 0 480 260" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+<rect width="480" height="260" fill="#e8ecf7"/>
+<circle cx="357" cy="78" r="48" fill="#e87938"/>
+<path d="M0 216l104-55 110 45 95-52 171 74v32H0z" fill="#bdcbe9"/>
+<path d="M0 249l163-71 82 37 129-50 106 37v58H0z" fill="#a6b8df"/>
+<path d="M0 0h480v29H0zm0 0h24v260H0zm164 0h21v260h-21zm150 0h18v260h-18zm148 0h18v260h-18z" fill="#233f9e"/>
+<path d="M0 85h480v10H0zM0 229h480v13H0z" fill="#233f9e"/>
+<path d="M24 29h24L24 86zm161 0h25l-25 57zm147 0h24l-24 57z" fill="#152e85"/>
+<path d="M0 241h480v19H0z" fill="#182e75"/>
+</svg>
+</div>
+<nav class="links" aria-label="账号操作">
+<a class="route" href="#register"><span class="tile"><svg class="glyph" aria-hidden="true"><use href="#icon-register"/></svg></span><span><strong>首次注册</strong><small>创建账号，录入本人标准照</small></span><span class="chev" aria-hidden="true">›</span></a>
+<a class="route" href="#login"><span class="tile"><svg class="glyph" aria-hidden="true"><use href="#journal"/></svg></span><span><strong>学号登录</strong><small>管理标准照，查看考勤记录</small></span><span class="chev" aria-hidden="true">›</span></a>
+</nav>
+</section>
+<section id="check" class="panel" hidden><a class="back" href="#home">‹ 返回首页</a><h1 tabindex="-1">现场照片</h1><p class="hint">请确保照片清晰，画面中只有本人。</p>
+<img class="preview" id="check-img" alt="本次现场照片预览" hidden><p id="check-note" class="file-note" role="status"></p>
+<button class="upload-choice" type="button" data-pick="check-photo">重新拍摄</button>
+</section>
+<input id="check-photo" type="file" accept="image/jpeg,image/png" capture="user" hidden>
+<section id="register" class="panel" hidden><a class="back" href="#home">‹ 返回首页</a><h1 tabindex="-1">首次注册</h1><p class="hint">填写个人资料，并录入一张清晰的单人标准照。</p>
+<form id="register-form">
+<label>姓名<input name="name" autocomplete="name" maxlength="64" required></label>
+<label>学号<input name="studentNo" inputmode="numeric" pattern="[0-9]{1,32}" maxlength="32" required></label>
+<label>密码<input type="password" name="password" autocomplete="new-password" minlength="8" maxlength="64" placeholder="8～64 个字符" required></label>
+<fieldset><legend>本人标准照</legend><p>JPEG 或 PNG，每张最多 5 MiB。</p><div class="choices">
+<button type="button" class="upload-choice" data-pick="reg-camera">拍摄标准照</button><button type="button" class="upload-choice" data-pick="reg-album">从相册选择</button></div>
+<input hidden id="reg-camera" type="file" accept="image/jpeg,image/png" capture="user"><input hidden id="reg-album" type="file" accept="image/jpeg,image/png">
+<img class="preview" id="reg-img" alt="待录入标准照预览" hidden>
+<p id="reg-note" class="file-note" role="status"></p></fieldset>
+<button class="submit" type="submit">注册并录入</button><p class="status" role="status"></p></form>
+<a href="#login" class="footlink">已有账号，前往登录</a></section>
+<section id="login" class="panel" hidden><a class="back" href="#home">‹ 返回首页</a><h1 tabindex="-1">学号登录</h1><p class="hint">登录后可管理本人标准照和考勤记录。</p>
+<form id="login-form"><label>学号<input name="studentNo" autocomplete="username" inputmode="numeric" pattern="[0-9]{1,32}" maxlength="32" required></label>
+<label>密码<input type="password" name="password" autocomplete="current-password" required></label><button class="submit" type="submit">登录</button><p class="status" role="status"></p></form><a href="#register" class="footlink">首次使用，前往注册</a></section>
+</main>
+<script>
+const byId = id => document.getElementById(id)
+const urls = new Map()
+function clearPhoto(kind) {
+  const img = byId(kind + '-img')
+  if (urls.has(kind)) URL.revokeObjectURL(urls.get(kind))
+  urls.delete(kind)
+  img.removeAttribute('src')
+  img.hidden = true
+  byId(kind + '-note').textContent = ''
+}
+function route() {
+  const key = location.hash.slice(1)
+  const active = ['login','register','check'].includes(key) ? key : 'home'
+  for (const section of document.querySelectorAll('main > section')) section.hidden = section.id !== active
+  document.querySelector('.account').hidden = active === 'home' || active === 'login'
+  if (active !== 'register') { clearPhoto('reg'); byId('register-form').reset(); byId('register-form').querySelector('.status').textContent = '' }
+  if (active !== 'login') { byId('login-form').reset(); byId('login-form').querySelector('.status').textContent = '' }
+  if (active !== 'check') clearPhoto('check')
+  if (location.hash) byId(active).querySelector('h1').focus({preventScroll:true})
+  window.scrollTo(0,0)
+}
+for (const button of document.querySelectorAll('[data-pick]')) {
+  button.addEventListener('click', () => byId(button.dataset.pick).click())
+}
+for (const input of document.querySelectorAll('input[type=file]')) {
+  input.addEventListener('change', () => {
+    const file = input.files[0]
+    if (!file) return
+    const kind = input.id === 'check-photo' ? 'check' : 'reg'
+    if (kind === 'check') location.hash = 'check'
+    clearPhoto(kind)
+    const note = byId(kind + '-note')
+    if (!['image/jpeg','image/png'].includes(file.type)) note.textContent = '请使用 JPEG 或 PNG 照片。'
+    else if (!file.size) note.textContent = '照片为空，请重新选择。'
+    else if (file.size > 5242880) note.textContent = '照片超过 5 MiB，请缩小后重试。'
+    else {
+      const url = URL.createObjectURL(file)
+      urls.set(kind,url)
+      const img = byId(kind + '-img')
+      img.src = url
+      img.hidden = false
+      note.textContent = kind === 'check' ? '设计预览：照片仅在本机显示，尚未提交打卡。' : '已选择标准照。'
+    }
+    input.value = ''
+  })
+}
+for (const form of document.forms) form.addEventListener('submit', event => {
+  event.preventDefault()
+  const msg = form.querySelector('.status')
+  if (form.id === 'register-form' && !form.elements.name.value.trim()) msg.textContent = '请填写姓名。'
+  else if (form.id === 'register-form' && !urls.has('reg')) msg.textContent = '请拍摄或选择一张标准照。'
+  else msg.textContent = '当前为设计预览，尚未连接服务。'
+})
+window.addEventListener('hashchange',route)
+window.addEventListener('pagehide',() => {for (const key of [...urls.keys()]) clearPhoto(key)})
+route()
+</script>
+</body></html>
